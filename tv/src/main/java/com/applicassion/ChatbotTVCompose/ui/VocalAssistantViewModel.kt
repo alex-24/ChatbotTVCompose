@@ -78,7 +78,7 @@ class VocalAssistantViewModel @Inject constructor(
     private fun initTextToSpeech() {
         textToSpeech = TextToSpeech(getApplication()) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                val result = textToSpeech?.setLanguage(Locale.FRENCH)
+                val result = textToSpeech?.setLanguage(Locale.US)
                 isTtsInitialized = result != TextToSpeech.LANG_MISSING_DATA 
                     && result != TextToSpeech.LANG_NOT_SUPPORTED
                 
