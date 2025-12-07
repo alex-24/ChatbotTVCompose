@@ -6,6 +6,8 @@ import android.app.Application
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
+import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
 import androidx.annotation.RequiresPermission
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
@@ -26,6 +28,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
+import java.util.Locale
 import javax.inject.Inject
 
 enum class ConversationRole {
@@ -63,20 +66,106 @@ class VocalAssistantViewModel @Inject constructor(
 
     private var audioRecordingJob: Job? = null
 
+    // Text-to-Speech
+    private var textToSpeech: TextToSpeech? = null
+    private var isTtsInitialized = false
+
     init {
+        initTextToSpeech()
         resetConversation()
+    }
+
+    private fun initTextToSpeech() {
+        textToSpeech = TextToSpeech(getApplication()) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                val result = textToSpeech?.setLanguage(Locale.FRENCH)
+                isTtsInitialized = result != TextToSpeech.LANG_MISSING_DATA 
+                    && result != TextToSpeech.LANG_NOT_SUPPORTED
+                
+                if (isTtsInitialized) {
+                    textToSpeech?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+                        override fun onStart(utteranceId: String?) {
+                            viewModelScope.launch(Dispatchers.Main) {
+                                _vocalAssistantUIState.value = _vocalAssistantUIState.value?.copy(
+                                    isSpeaking = true
+                                )
+                            }
+                        }
+
+                        override fun onDone(utteranceId: String?) {
+                            viewModelScope.launch(Dispatchers.Main) {
+                                _vocalAssistantUIState.value = _vocalAssistantUIState.value?.copy(
+                                    isSpeaking = false
+                                )
+                            }
+                        }
+
+                        @Suppress("OVERRIDE_DEPRECATION")
+                        override fun onError(utteranceId: String?) {
+                            viewModelScope.launch(Dispatchers.Main) {
+                                _vocalAssistantUIState.value = _vocalAssistantUIState.value?.copy(
+                                    isSpeaking = false
+                                )
+                            }
+                        }
+
+                        override fun onError(utteranceId: String?, errorCode: Int) {
+                            viewModelScope.launch(Dispatchers.Main) {
+                                _vocalAssistantUIState.value = _vocalAssistantUIState.value?.copy(
+                                    isSpeaking = false
+                                )
+                            }
+                            Log.e(TAG, "TTS error: $errorCode")
+                        }
+                    })
+                    Log.d(TAG, "TextToSpeech initialized successfully")
+                } else {
+                    Log.e(TAG, "TextToSpeech language not supported")
+                }
+            } else {
+                Log.e(TAG, "TextToSpeech initialization failed")
+            }
+        }
+    }
+
+    private fun speak(text: String) {
+        if (isTtsInitialized) {
+            textToSpeech?.speak(
+                text,
+                TextToSpeech.QUEUE_FLUSH,
+                null,
+                "bot_response_${System.currentTimeMillis()}"
+            )
+        }
+    }
+
+    fun stopSpeaking() {
+        textToSpeech?.stop()
+        _vocalAssistantUIState.value = _vocalAssistantUIState.value?.copy(
+            isSpeaking = false
+        )
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        textToSpeech?.stop()
+        textToSpeech?.shutdown()
+        textToSpeech = null
     }
 
 
     fun resetConversation() {
+        stopSpeaking()
         _isRecordingFlag.set(false)
         audioRecordingJob?.cancel()
         _conversation.clear()
         _vocalAssistantUIState.value = VocalAssistantUIState(isRecording = false, error = null)
+        val greeting = "Hi, how can I help you?"
         addConversationElement(
             role = ConversationRole.CHAT_BOT,
-            text = "Hi, how can I help you?"
+            text = greeting
         )
+        speak(greeting)
     }
 
 
@@ -150,6 +239,9 @@ class VocalAssistantViewModel @Inject constructor(
     @SuppressLint("MissingPermission")
     private fun startAudioRecording() {
         if (!isRecordingAudio) {
+            // Stop any ongoing TTS before recording
+            stopSpeaking()
+            
             _isRecordingFlag.set(true)
             _vocalAssistantUIState.value = _vocalAssistantUIState.value!!.copy(
                 isRecording = true,
@@ -188,6 +280,8 @@ class VocalAssistantViewModel @Inject constructor(
                                     isLoading = false,
                                     error = null
                                 )
+                                // Speak the bot response
+                                speak(botResponse)
                             } else {
                                 _vocalAssistantUIState.value = _vocalAssistantUIState.value!!.copy(
                                     isLoading = false,
@@ -338,5 +432,6 @@ class VocalAssistantViewModel @Inject constructor(
 data class VocalAssistantUIState(
     val isRecording: Boolean = false,
     val isLoading: Boolean = false,
+    val isSpeaking: Boolean = false,
     val error: String? = null
 )
