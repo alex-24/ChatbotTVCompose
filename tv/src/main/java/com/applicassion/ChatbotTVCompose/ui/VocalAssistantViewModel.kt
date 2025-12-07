@@ -15,7 +15,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import java.util.concurrent.atomic.AtomicBoolean
 import com.applicassion.ChatbotTVCompose.data.remote.ai_provider.BaseAIService
+import com.applicassion.ChatbotTVCompose.domain.model.ChatMessage
 import com.applicassion.ChatbotTVCompose.domain.usecase.SpeechToTextUseCase
+import com.applicassion.ChatbotTVCompose.domain.usecase.TextGenerationUseCase
 import com.applicassion.ChatbotTVCompose.domain.utils.DomainResponse
 import com.applicassion.ChatbotTVCompose.utils.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,8 +36,14 @@ enum class ConversationRole {
 @HiltViewModel
 class VocalAssistantViewModel @Inject constructor(
     application: Application,
-    val speechToTextUseCase: SpeechToTextUseCase
+    private val speechToTextUseCase: SpeechToTextUseCase,
+    private val textGenerationUseCase: TextGenerationUseCase
 ): AndroidViewModel(application) {
+
+    companion object {
+        private const val TAG = "VocalAssistantViewModel"
+        private const val SYSTEM_PROMPT = "You are a friendly and helpful TV assistant. Keep your responses concise and conversational."
+    }
 
     private val _vocalAssistantUIState: MutableLiveData<VocalAssistantUIState> = MutableLiveData(
         VocalAssistantUIState(isRecording = false, error = null)
@@ -54,10 +62,6 @@ class VocalAssistantViewModel @Inject constructor(
         get() = _isRecordingFlag.get()
 
     private var audioRecordingJob: Job? = null
-    
-    companion object {
-        private const val TAG = "VocalAssistantViewModel"
-    }
 
     init {
         resetConversation()
@@ -86,6 +90,37 @@ class VocalAssistantViewModel @Inject constructor(
         return when (result) {
             is DomainResponse.Error -> null
             is DomainResponse.Success -> result.data.text
+        }
+    }
+
+    private suspend fun generateChatResponse(userMessage: String): String? {
+        // Build messages list with system prompt and conversation history
+        val messages = buildList {
+            add(ChatMessage(ChatMessage.Role.SYSTEM, SYSTEM_PROMPT))
+            
+            // Add conversation history (skip the initial greeting)
+            _conversation.drop(1).forEach { (role, text) ->
+                add(ChatMessage(
+                    role = when (role) {
+                        ConversationRole.USER -> ChatMessage.Role.USER
+                        ConversationRole.CHAT_BOT -> ChatMessage.Role.ASSISTANT
+                    },
+                    content = text
+                ))
+            }
+            
+            // Add current user message
+            add(ChatMessage(ChatMessage.Role.USER, userMessage))
+        }
+
+        val result = textGenerationUseCase(
+            model = BaseAIService.TextGenerationModel.LLAMA_8B_INSTRUCT,
+            messages = messages
+        )
+
+        return when (result) {
+            is DomainResponse.Error -> null
+            is DomainResponse.Success -> result.data.response
         }
     }
 
@@ -125,19 +160,43 @@ class VocalAssistantViewModel @Inject constructor(
                 val rawBytes = recordAudioToBytes()
                 
                 if (rawBytes != null && rawBytes.size > Constants.Audio.MIN_AUDIO_BYTES) {
-                    val text = convertSpeechToText(audioCapture = rawBytes)
+                    val userText = convertSpeechToText(audioCapture = rawBytes)
                     
-                    withContext(Dispatchers.Main) {
-                        if (text != null) {
+                    if (!userText?.trim().isNullOrEmpty()) {
+                        withContext(Dispatchers.Main) {
                             addConversationElement(
                                 role = ConversationRole.USER,
-                                text = text
+                                text = userText
                             )
                             _vocalAssistantUIState.value = _vocalAssistantUIState.value!!.copy(
                                 isRecording = false,
+                                isLoading = true,
                                 error = null
                             )
-                        } else {
+                        }
+                        
+                        // Generate chatbot response
+                        val botResponse = generateChatResponse(userText)
+                        
+                        withContext(Dispatchers.Main) {
+                            if (botResponse != null) {
+                                addConversationElement(
+                                    role = ConversationRole.CHAT_BOT,
+                                    text = botResponse
+                                )
+                                _vocalAssistantUIState.value = _vocalAssistantUIState.value!!.copy(
+                                    isLoading = false,
+                                    error = null
+                                )
+                            } else {
+                                _vocalAssistantUIState.value = _vocalAssistantUIState.value!!.copy(
+                                    isLoading = false,
+                                    error = "Failed to generate response"
+                                )
+                            }
+                        }
+                    } else {
+                        withContext(Dispatchers.Main) {
                             _vocalAssistantUIState.value = _vocalAssistantUIState.value!!.copy(
                                 isRecording = false,
                                 error = "No words detected in audio recording"
@@ -278,5 +337,6 @@ class VocalAssistantViewModel @Inject constructor(
 
 data class VocalAssistantUIState(
     val isRecording: Boolean = false,
+    val isLoading: Boolean = false,
     val error: String? = null
 )

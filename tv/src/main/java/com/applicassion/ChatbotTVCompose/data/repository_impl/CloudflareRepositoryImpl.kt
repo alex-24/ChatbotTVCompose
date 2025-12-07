@@ -3,7 +3,11 @@ package com.applicassion.ChatbotTVCompose.data.repository_impl
 import android.content.Context
 import android.util.Log
 import com.applicassion.ChatbotTVCompose.data.remote.ai_provider.cloudflare.CloudflareWorkersBaseAIService
+import com.applicassion.ChatbotTVCompose.data.remote.ai_provider.cloudflare.dto.textgen.CFLlamaRequestDTO
+import com.applicassion.ChatbotTVCompose.data.remote.ai_provider.cloudflare.dto.textgen.CFMessageDTO
+import com.applicassion.ChatbotTVCompose.domain.model.ChatMessage
 import com.applicassion.ChatbotTVCompose.domain.model.SpeechToTextResult
+import com.applicassion.ChatbotTVCompose.domain.model.TextGenerationResult
 import com.applicassion.ChatbotTVCompose.domain.repository.AIRepository
 import com.applicassion.ChatbotTVCompose.data.remote.ai_provider.BaseAIService
 import com.applicassion.ChatbotTVCompose.domain.utils.DomainResponse
@@ -52,6 +56,35 @@ class CloudflareRepositoryImpl @Inject constructor(
             DomainResponse.Success(data = result)
         } catch (e: Exception) {
             Log.e(TAG, "Speech-to-text failed", e)
+            DomainResponse.Error(e)
+        }
+    }
+
+    override suspend fun textGeneration(
+        model: BaseAIService.TextGenerationModel,
+        messages: List<ChatMessage>
+    ): DomainResponse<TextGenerationResult> {
+        return try {
+            val request = CFLlamaRequestDTO(
+                messages = messages.map { CFMessageDTO.fromDomain(it) }
+            )
+            
+            val envelopeDTO = cloudflareWorkersAIService.textGeneration(
+                modelId = model.modelId,
+                request = request
+            )
+            
+            if (envelopeDTO.success && envelopeDTO.result != null) {
+                val result = envelopeDTO.result.toDomain()
+                Log.d(TAG, "Text generation result: '${result.response}'")
+                DomainResponse.Success(data = result)
+            } else {
+                val errorMsg = envelopeDTO.errors.joinToString { it.message }
+                Log.e(TAG, "Text generation failed: $errorMsg")
+                DomainResponse.Error(Exception(errorMsg))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Text generation failed", e)
             DomainResponse.Error(e)
         }
     }
