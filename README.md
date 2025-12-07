@@ -26,7 +26,7 @@ https://github.com/user-attachments/assets/c9809be6-7cf5-4391-bf2d-403b805fd37a
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                        UI Layer                              │
+│                        UI Layer                             │
 │  ┌─────────────┐  ┌──────────────┐  ┌────────────────────┐  │
 │  │ HomeScreen  │  │ HeaderWidget │  │ VocalAssistantVM   │  │
 │  │ (Compose)   │  │ (Compose)    │  │ (ViewModel)        │  │
@@ -35,19 +35,19 @@ https://github.com/user-attachments/assets/c9809be6-7cf5-4391-bf2d-403b805fd37a
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                      Domain Layer                            │
-│  ┌───────────────────┐  ┌────────────────────────────────┐  │
-│  │ SpeechToTextUseCase│  │ TextGenerationUseCase          │  │
-│  └───────────────────┘  └────────────────────────────────┘  │
+│                      Domain Layer                           │
+│  ┌────────────────────┐  ┌────────────────────────────────┐ │
+│  │ SpeechToTextUseCase│  │ TextGenerationUseCase          │ │
+│  └────────────────────┘  └────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                       Data Layer                             │
+│                       Data Layer                            │
 │  ┌────────────────────────────────────────────────────────┐ │
-│  │ CloudflareRepositoryImpl                                │ │
-│  │  • Speech-to-Text (Whisper)                             │ │
-│  │  • Text Generation (Llama 3.1 8B Instruct)              │ │
+│  │ CloudflareRepositoryImpl                               │ │
+│  │  • Speech-to-Text (Whisper)                            │ │
+│  │  • Text Generation (Llama 3.1 8B Instruct)             │ │
 │  └────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
 ```
