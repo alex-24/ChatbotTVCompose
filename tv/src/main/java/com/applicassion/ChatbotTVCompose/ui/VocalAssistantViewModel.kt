@@ -14,8 +14,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import java.util.concurrent.atomic.AtomicBoolean
-import com.applicassion.ChatbotTVCompose.domain.model.SpeechToTextResult
-import com.applicassion.ChatbotTVCompose.domain.service.AIService
+import com.applicassion.ChatbotTVCompose.data.remote.ai_provider.BaseAIService
 import com.applicassion.ChatbotTVCompose.domain.usecase.SpeechToTextUseCase
 import com.applicassion.ChatbotTVCompose.domain.utils.DomainResponse
 import com.applicassion.ChatbotTVCompose.utils.Constants
@@ -80,7 +79,7 @@ class VocalAssistantViewModel @Inject constructor(
 
     private suspend fun convertSpeechToText(audioCapture: ByteArray): String? {
         val result = speechToTextUseCase(
-            model = AIService.SpeechToTextModel.WHISPER,
+            model = BaseAIService.SpeechToTextModel.WHISPER,
             audioCapture = audioCapture
         )
 

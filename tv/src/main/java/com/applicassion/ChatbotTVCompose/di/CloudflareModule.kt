@@ -3,7 +3,7 @@ package com.applicassion.ChatbotTVCompose.di
 import android.content.Context
 import com.applicassion.ChatbotTVCompose.data.remote.utils.RequestHeaderInterceptors
 import com.applicassion.ChatbotTVCompose.BuildConfig
-import com.applicassion.ChatbotTVCompose.data.remote.ai_provider.cloudflare.CloudflareWorkersAIService
+import com.applicassion.ChatbotTVCompose.data.remote.ai_provider.cloudflare.CloudflareWorkersBaseAIService
 import com.applicassion.ChatbotTVCompose.data.repository_impl.CloudflareRepositoryImpl
 import com.applicassion.ChatbotTVCompose.domain.repository.AIRepository
 import com.applicassion.ChatbotTVCompose.domain.usecase.SpeechToTextUseCase
@@ -71,14 +71,14 @@ class CloudflareModule {
 
     @Provides
     @Singleton
-    fun provideCloudflareWorkersAiService(@CloudflareRetrofit retrofit: Retrofit): CloudflareWorkersAIService {
-        return retrofit.create(CloudflareWorkersAIService::class.java)
+    fun provideCloudflareWorkersAiService(@CloudflareRetrofit retrofit: Retrofit): CloudflareWorkersBaseAIService {
+        return retrofit.create(CloudflareWorkersBaseAIService::class.java)
     }
 
     @Provides
     @Singleton
     fun provideAIRepository(
-        service: CloudflareWorkersAIService,
+        service: CloudflareWorkersBaseAIService,
         @ApplicationContext context: Context
     ): AIRepository {
         return CloudflareRepositoryImpl(

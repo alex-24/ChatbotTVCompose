@@ -1,7 +1,7 @@
 package com.applicassion.ChatbotTVCompose.data.remote.ai_provider.cloudflare
 
 import com.applicassion.ChatbotTVCompose.data.remote.ai_provider.cloudflare.dto.speech_to_text.CFWhisperEnvelopeDTO
-import com.applicassion.ChatbotTVCompose.domain.service.AIService
+import com.applicassion.ChatbotTVCompose.data.remote.ai_provider.BaseAIService
 import okhttp3.RequestBody
 import retrofit2.http.Body
 import retrofit2.http.POST
@@ -11,7 +11,7 @@ import retrofit2.http.Path
  * Cloudflare Workers AI Retrofit service.
  * Uses standard model IDs from AIService.
  */
-interface CloudflareWorkersAIService : AIService {
+interface CloudflareWorkersBaseAIService : BaseAIService {
 
     @POST("{modelId}")
     suspend fun speechToText(

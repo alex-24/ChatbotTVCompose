@@ -2,10 +2,10 @@ package com.applicassion.ChatbotTVCompose.data.repository_impl
 
 import android.content.Context
 import android.util.Log
-import com.applicassion.ChatbotTVCompose.data.remote.ai_provider.cloudflare.CloudflareWorkersAIService
+import com.applicassion.ChatbotTVCompose.data.remote.ai_provider.cloudflare.CloudflareWorkersBaseAIService
 import com.applicassion.ChatbotTVCompose.domain.model.SpeechToTextResult
 import com.applicassion.ChatbotTVCompose.domain.repository.AIRepository
-import com.applicassion.ChatbotTVCompose.domain.service.AIService
+import com.applicassion.ChatbotTVCompose.data.remote.ai_provider.BaseAIService
 import com.applicassion.ChatbotTVCompose.domain.utils.DomainResponse
 import com.applicassion.ChatbotTVCompose.utils.Constants
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -18,7 +18,7 @@ import java.nio.ByteOrder
 import javax.inject.Inject
 
 class CloudflareRepositoryImpl @Inject constructor(
-    private val cloudflareWorkersAIService: CloudflareWorkersAIService,
+    private val cloudflareWorkersAIService: CloudflareWorkersBaseAIService,
     @ApplicationContext private val context: Context
 ): AIRepository {
     companion object {
@@ -27,7 +27,7 @@ class CloudflareRepositoryImpl @Inject constructor(
     }
 
     override suspend fun speechToText(
-        model: AIService.SpeechToTextModel,
+        model: BaseAIService.SpeechToTextModel,
         audioCapture: ByteArray
     ): DomainResponse<SpeechToTextResult> {
         return try {
