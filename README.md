@@ -1,4 +1,4 @@
-# ChatbotTVCompose 🎙️
+# NovaTV 🎙️
 
 A modern voice-powered AI assistant for Android TV, built with Jetpack Compose for TV.
 

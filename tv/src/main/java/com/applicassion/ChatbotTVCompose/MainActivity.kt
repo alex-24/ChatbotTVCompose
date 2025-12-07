@@ -35,7 +35,6 @@ class MainActivity : ComponentActivity() {
             ChatbotTVComposeApplicationUI(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 32.dp, vertical = 8.dp)
             ) {
                 NavigationComponent()
             }
