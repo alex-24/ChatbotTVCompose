@@ -1,12 +1,9 @@
-# NovaTV 🎙️
+# ChatbotTVCompose 🎙️
 
 A modern voice-powered AI assistant for Android TV, built with Jetpack Compose for TV.
 
-<p align="center">
-  <video src="readme_resources/Screen_recording_20251207_202013.mp4" width="100%" controls>
-    Your browser does not support the video tag.
-  </video>
-</p>
+
+https://github.com/user-attachments/assets/e1afa443-cb55-47ce-a1f2-e2f9b36b0f10
 
 > **Note:** If the video doesn't play above, you can find it at [`readme_resources/Screen_recording_20251207_202013.mp4`](readme_resources/Screen_recording_20251207_202013.mp4)
 
