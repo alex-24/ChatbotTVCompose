@@ -1,4 +1,4 @@
-package com.applicassion.ChatbotTVCompose.data.reposirory_impl
+package com.applicassion.ChatbotTVCompose.data.repository_impl
 
 import android.content.Context
 import android.util.Log

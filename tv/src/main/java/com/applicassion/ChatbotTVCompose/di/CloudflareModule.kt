@@ -4,7 +4,7 @@ import android.content.Context
 import com.applicassion.ChatbotTVCompose.data.remote.utils.RequestHeaderInterceptors
 import com.applicassion.ChatbotTVCompose.BuildConfig
 import com.applicassion.ChatbotTVCompose.data.remote.ai_provider.cloudflare.CloudflareWorkersAIService
-import com.applicassion.ChatbotTVCompose.data.reposirory_impl.CloudflareRepositoryImpl
+import com.applicassion.ChatbotTVCompose.data.repository_impl.CloudflareRepositoryImpl
 import com.applicassion.ChatbotTVCompose.domain.repository.AIRepository
 import com.applicassion.ChatbotTVCompose.domain.usecase.SpeechToTextUseCase
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
