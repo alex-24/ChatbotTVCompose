@@ -3,7 +3,14 @@
 A modern voice-powered AI assistant for Android TV, built with Jetpack Compose for TV.
 
 
-https://github.com/user-attachments/assets/e1afa443-cb55-47ce-a1f2-e2f9b36b0f10
+### - Screenshot:
+<img width="540" alt="Screenshot_20251207_205054" src="https://github.com/user-attachments/assets/bf022153-8aeb-4efa-86cd-851131fe7404" />
+
+
+### - Recording:
+https://github.com/user-attachments/assets/c9809be6-7cf5-4391-bf2d-403b805fd37a
+
+
 
 > **Note:** If the video doesn't play above, you can find it at [`readme_resources/Screen_recording_20251207_202013.mp4`](readme_resources/Screen_recording_20251207_202013.mp4)
 
