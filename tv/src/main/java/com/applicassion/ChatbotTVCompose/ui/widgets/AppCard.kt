@@ -1,7 +1,6 @@
 package com.applicassion.ChatbotTVCompose.ui.widgets
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -22,12 +21,11 @@ import androidx.tv.material3.Card
 import androidx.tv.material3.CardDefaults
 import androidx.tv.material3.Glow
 import androidx.tv.material3.Text
+import coil3.compose.AsyncImage
 import com.applicassion.ChatbotTVCompose.domain.model.AppModel
 import com.applicassion.ChatbotTVCompose.ui.theme.AccentPurple
 import com.applicassion.ChatbotTVCompose.ui.theme.BackgroundCard
-import com.google.accompanist.drawablepainter.rememberDrawablePainter
 
-// Pre-computed constants
 private val CardShape = RoundedCornerShape(12.dp)
 private val CardWidth = 120.dp
 private val IconSize = 80.dp
@@ -42,8 +40,6 @@ fun AppCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val iconPainter = rememberDrawablePainter(drawable = app.icon)
-
     Column(
         modifier = modifier.width(CardWidth),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -69,8 +65,8 @@ fun AppCard(
                 )
             )
         ) {
-            Image(
-                painter = iconPainter,
+            AsyncImage(
+                model = app.icon,
                 contentDescription = null,
                 modifier = Modifier
                     .size(IconSize)
