@@ -72,16 +72,18 @@ fun HeaderWidget(
         }
     }
 
-    val onMicClick: () -> Unit = {
-        val granted = ContextCompat.checkSelfPermission(
-            context,
-            audioRecordingPermission
-        ) == PackageManager.PERMISSION_GRANTED
+    val onMicClick = remember(context, vocalAssistantViewModel, permissionLauncher) {
+        {
+            val granted = ContextCompat.checkSelfPermission(
+                context,
+                audioRecordingPermission
+            ) == PackageManager.PERMISSION_GRANTED
 
-        if (granted) {
-            vocalAssistantViewModel.onMicClickWithPermission()
-        } else {
-            permissionLauncher.launch(audioRecordingPermission)
+            if (granted) {
+                vocalAssistantViewModel.onMicClickWithPermission()
+            } else {
+                permissionLauncher.launch(audioRecordingPermission)
+            }
         }
     }
 
@@ -122,6 +124,34 @@ fun HeaderWidget(
 
         Spacer(modifier = Modifier.weight(1f))
 
+        // Remember callbacks to avoid recomposition
+        val onNotificationsClick = remember(context) {
+            {
+                context.startActivity(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                    putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                })
+            }
+        }
+        val onAppsButtonClick = remember(context, onAppsClick) {
+            {
+                if (onAppsClick != null) {
+                    onAppsClick()
+                } else {
+                    context.startActivity(Intent(Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    })
+                }
+            }
+        }
+        val onSettingsClick = remember(context) {
+            {
+                context.startActivity(Intent(Settings.ACTION_SETTINGS).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                })
+            }
+        }
+
         // Action Buttons
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -131,38 +161,21 @@ fun HeaderWidget(
             HeaderIconButton(
                 icon = Icons.Rounded.Notifications,
                 contentDescription = "Notifications",
-                onClick = {
-                    context.startActivity(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-                        putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    })
-                }
+                onClick = onNotificationsClick
             )
 
             // Apps
             HeaderIconButton(
                 icon = Icons.Rounded.Apps,
                 contentDescription = "Apps",
-                onClick = {
-                    if (onAppsClick != null) {
-                        onAppsClick()
-                    } else {
-                        context.startActivity(Intent(Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS).apply {
-                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        })
-                    }
-                }
+                onClick = onAppsButtonClick
             )
 
             // Settings
             HeaderIconButton(
                 icon = Icons.Rounded.Settings,
                 contentDescription = "Settings",
-                onClick = {
-                    context.startActivity(Intent(Settings.ACTION_SETTINGS).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    })
-                }
+                onClick = onSettingsClick
             )
 
             Spacer(modifier = Modifier.width(8.dp))

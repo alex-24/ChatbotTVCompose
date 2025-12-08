@@ -14,8 +14,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,6 +44,9 @@ import com.applicassion.ChatbotTVCompose.ui.widgets.HeaderWidget
 import com.applicassion.ChatbotTVCompose.ui.widgets.TvCircularProgressIndicator
 
 private val ChatBubbleShape = RoundedCornerShape(16.dp)
+private val ChatBubbleNoScale = CardDefaults.scale(focusedScale = 1f)
+private val ChatBotBorder = BorderStroke(3.dp, ChatBotBubbleBorder)
+private val UserBorder = BorderStroke(3.dp, UserBubbleBorder)
 
 @Composable
 fun HomeScreen(
@@ -58,6 +63,9 @@ fun HomeScreen(
     // Apps state
     val installedApps by appsViewModel.appList.collectAsState()
     val isLoadingApps by appsViewModel.isLoading.collectAsState()
+    
+    // Memoize the limited apps list to avoid creating new list on every recomposition
+    val displayedApps by remember { derivedStateOf { installedApps.take(8) } }
 
     Column(
         modifier = modifier
@@ -77,13 +85,11 @@ fun HomeScreen(
         if (isLoadingApps) {
             AppsRowPlaceholder()
             Spacer(modifier = Modifier.height(24.dp))
-        } else if (installedApps.isNotEmpty()) {
+        } else if (displayedApps.isNotEmpty()) {
             AppsRow(
                 title = "Your Apps",
-                apps = installedApps.take(8), // Show only first 8 on home
-                onAppClick = { app ->
-                    appsViewModel.launchApp(app)
-                },
+                apps = displayedApps,
+                onAppClick = appsViewModel::launchApp,
                 onSeeAllClick = onNavigateToAllApps
             )
             Spacer(modifier = Modifier.height(24.dp))
@@ -156,10 +162,10 @@ private fun ChatBubble(
     role: ConversationRole,
     modifier: Modifier = Modifier
 ) {
-    val (containerColor, borderColor, alignment) = when (role) {
-        ConversationRole.CHAT_BOT -> Triple(ChatBotBubble, ChatBotBubbleBorder, Alignment.CenterStart)
-        ConversationRole.USER -> Triple(UserBubble, UserBubbleBorder, Alignment.CenterEnd)
-    }
+    val isBot = role == ConversationRole.CHAT_BOT
+    val containerColor = if (isBot) ChatBotBubble else UserBubble
+    val borderStroke = if (isBot) ChatBotBorder else UserBorder
+    val alignment = if (isBot) Alignment.CenterStart else Alignment.CenterEnd
     
     Box(
         modifier = modifier.fillMaxWidth(),
@@ -172,10 +178,10 @@ private fun ChatBubble(
                 containerColor = containerColor,
                 focusedContainerColor = containerColor
             ),
-            scale = CardDefaults.scale(focusedScale = 1f),
+            scale = ChatBubbleNoScale,
             border = CardDefaults.border(
                 focusedBorder = Border(
-                    border = BorderStroke(3.dp, borderColor),
+                    border = borderStroke,
                     shape = ChatBubbleShape
                 )
             ),

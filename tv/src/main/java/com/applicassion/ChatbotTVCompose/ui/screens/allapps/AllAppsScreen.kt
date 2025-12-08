@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -106,9 +107,10 @@ fun AllAppsScreen(
                     items = apps,
                     key = { it.packageName }
                 ) { app ->
+                    val onClick = remember(app.packageName) { { appsViewModel.launchApp(app) } }
                     AppCard(
                         app = app,
-                        onClick = { appsViewModel.launchApp(app) }
+                        onClick = onClick
                     )
                 }
             }

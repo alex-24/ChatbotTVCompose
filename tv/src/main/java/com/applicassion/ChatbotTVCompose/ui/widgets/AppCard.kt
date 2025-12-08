@@ -1,5 +1,6 @@
 package com.applicassion.ChatbotTVCompose.ui.widgets
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -16,13 +17,24 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.tv.material3.Border
 import androidx.tv.material3.Card
 import androidx.tv.material3.CardDefaults
+import androidx.tv.material3.Glow
 import androidx.tv.material3.Text
 import com.applicassion.ChatbotTVCompose.domain.model.AppModel
 import com.applicassion.ChatbotTVCompose.ui.theme.AccentPurple
 import com.applicassion.ChatbotTVCompose.ui.theme.BackgroundCard
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
+
+// Pre-computed constants
+private val CardShape = RoundedCornerShape(12.dp)
+private val CardWidth = 120.dp
+private val IconSize = 80.dp
+private val IconPadding = 12.dp
+private val LabelWidth = 100.dp
+private val FocusedBorderStroke = BorderStroke(2.dp, AccentPurple)
+private val FocusedGlowColor = AccentPurple.copy(alpha = 0.5f)
 
 @Composable
 fun AppCard(
@@ -30,42 +42,39 @@ fun AppCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val cardShape = RoundedCornerShape(12.dp)
-    
+    val iconPainter = rememberDrawablePainter(drawable = app.icon)
+
     Column(
-        modifier = modifier.width(120.dp),
+        modifier = modifier.width(CardWidth),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Card(
             onClick = onClick,
-            shape = CardDefaults.shape(cardShape),
+            shape = CardDefaults.shape(CardShape),
             colors = CardDefaults.colors(
                 containerColor = BackgroundCard,
                 focusedContainerColor = BackgroundCard
             ),
-            scale = CardDefaults.scale(
-                scale = 1f,
-                focusedScale = 1.1f
-            ),
+            scale = CardDefaults.scale(scale = 1f, focusedScale = 1.1f),
             border = CardDefaults.border(
-                focusedBorder = androidx.tv.material3.Border(
-                    border = androidx.compose.foundation.BorderStroke(2.dp, AccentPurple),
-                    shape = cardShape
+                focusedBorder = Border(
+                    border = FocusedBorderStroke,
+                    shape = CardShape
                 )
             ),
             glow = CardDefaults.glow(
-                focusedGlow = androidx.tv.material3.Glow(
-                    elevationColor = AccentPurple.copy(alpha = 0.5f),
+                focusedGlow = Glow(
+                    elevationColor = FocusedGlowColor,
                     elevation = 8.dp
                 )
             )
         ) {
             Image(
-                painter = rememberDrawablePainter(drawable = app.icon),
-                contentDescription = app.label,
+                painter = iconPainter,
+                contentDescription = null,
                 modifier = Modifier
-                    .size(80.dp)
-                    .padding(12.dp)
+                    .size(IconSize)
+                    .padding(IconPadding)
             )
         }
         
@@ -78,8 +87,7 @@ fun AppCard(
             textAlign = TextAlign.Center,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.width(100.dp)
+            modifier = Modifier.width(LabelWidth)
         )
     }
 }
-

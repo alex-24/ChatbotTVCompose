@@ -37,6 +37,8 @@ import com.applicassion.ChatbotTVCompose.domain.model.AppModel
 import com.applicassion.ChatbotTVCompose.ui.theme.AccentPurple
 import com.applicassion.ChatbotTVCompose.ui.theme.BackgroundCard
 
+private val SeeAllButtonShape = RoundedCornerShape(8.dp)
+
 @Composable
 fun AppsRow(
     title: String,
@@ -76,9 +78,11 @@ fun AppsRow(
                 items = apps,
                 key = { it.packageName }
             ) { app ->
+                // Remember the click handler to avoid recomposition
+                val onClick = remember(app.packageName) { { onAppClick(app) } }
                 AppCard(
                     app = app,
-                    onClick = { onAppClick(app) }
+                    onClick = onClick
                 )
             }
         }
@@ -94,7 +98,7 @@ private fun SeeAllButton(
 
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
+            .clip(SeeAllButtonShape)
             .background(if (isFocused) AccentPurple else BackgroundCard)
             .onFocusChanged { isFocused = it.isFocused }
             .focusable()
