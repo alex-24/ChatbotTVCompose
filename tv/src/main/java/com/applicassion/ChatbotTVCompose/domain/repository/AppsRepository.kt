@@ -4,9 +4,10 @@ import com.applicassion.ChatbotTVCompose.domain.model.AppModel
 
 interface AppsRepository {
     /**
-     * Get all installed apps that can be launched
+     * Get all installed apps that can be launched.
+     * Results are cached after first load.
      */
-    fun getInstalledApps(): List<AppModel>
+    suspend fun getInstalledApps(): List<AppModel>
     
     /**
      * Launch an app by package name

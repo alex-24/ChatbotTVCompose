@@ -21,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.material3.Border
 import androidx.tv.material3.Card
 import androidx.tv.material3.CardDefaults
@@ -29,6 +28,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import com.applicassion.ChatbotTVCompose.LocalVocalAssistantViewModel
+import com.applicassion.ChatbotTVCompose.ui.navigation.LocalAppsViewModel
 import com.applicassion.ChatbotTVCompose.ui.ConversationRole
 import com.applicassion.ChatbotTVCompose.ui.VocalAssistantUIState
 import com.applicassion.ChatbotTVCompose.ui.theme.ChatBotBubble
@@ -37,6 +37,7 @@ import com.applicassion.ChatbotTVCompose.ui.theme.TextPrimary
 import com.applicassion.ChatbotTVCompose.ui.theme.UserBubble
 import com.applicassion.ChatbotTVCompose.ui.theme.UserBubbleBorder
 import com.applicassion.ChatbotTVCompose.ui.widgets.AppsRow
+import com.applicassion.ChatbotTVCompose.ui.widgets.AppsRowPlaceholder
 import com.applicassion.ChatbotTVCompose.ui.widgets.HeaderWidget
 import com.applicassion.ChatbotTVCompose.ui.widgets.TvCircularProgressIndicator
 
@@ -44,10 +45,11 @@ private val ChatBubbleShape = RoundedCornerShape(16.dp)
 
 @Composable
 fun HomeScreen(
-    modifier: Modifier = Modifier,
-    appsViewModel: AppsViewModel = hiltViewModel()
+    onNavigateToAllApps: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val vocalAssistantViewModel = LocalVocalAssistantViewModel.current
+    val appsViewModel = LocalAppsViewModel.current
     val uiState by vocalAssistantViewModel.vocalAssistantUIState.observeAsState(
         VocalAssistantUIState()
     )
@@ -67,20 +69,23 @@ fun HomeScreen(
             .fillMaxSize()
     ) {
         // Header with mic button
-        HeaderWidget()
+        HeaderWidget(onAppsClick = onNavigateToAllApps)
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Apps Row
-        if (!isLoadingApps && installedApps.isNotEmpty()) {
+        // Apps Row - show placeholder while loading
+        if (isLoadingApps) {
+            AppsRowPlaceholder()
+            Spacer(modifier = Modifier.height(24.dp))
+        } else if (installedApps.isNotEmpty()) {
             AppsRow(
                 title = "Your Apps",
                 apps = installedApps.take(8), // Show only first 8 on home
                 onAppClick = { app ->
                     appsViewModel.launchApp(app)
-                }
+                },
+                onSeeAllClick = onNavigateToAllApps
             )
-            
             Spacer(modifier = Modifier.height(24.dp))
         }
 

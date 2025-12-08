@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -29,11 +28,10 @@ class AppsViewModel @Inject constructor(
     }
 
     fun loadApps() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _isLoading.value = true
-            val apps = withContext(Dispatchers.IO) {
-                appsRepository.getInstalledApps()
-            }
+            // Repository handles IO dispatcher and caching internally
+            val apps = appsRepository.getInstalledApps()
             _appList.value = apps
             _isLoading.value = false
         }

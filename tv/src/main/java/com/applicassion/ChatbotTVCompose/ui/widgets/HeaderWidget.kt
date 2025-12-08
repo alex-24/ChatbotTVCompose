@@ -56,7 +56,10 @@ import com.applicassion.ChatbotTVCompose.ui.theme.RecordingRed
 import com.applicassion.ChatbotTVCompose.ui.theme.TextMuted
 
 @Composable
-fun HeaderWidget(modifier: Modifier = Modifier) {
+fun HeaderWidget(
+    modifier: Modifier = Modifier,
+    onAppsClick: (() -> Unit)? = null
+) {
     val vocalAssistantViewModel = LocalVocalAssistantViewModel.current
     val context = LocalContext.current
     val audioRecordingPermission = android.Manifest.permission.RECORD_AUDIO
@@ -141,9 +144,13 @@ fun HeaderWidget(modifier: Modifier = Modifier) {
                 icon = Icons.Rounded.Apps,
                 contentDescription = "Apps",
                 onClick = {
-                    context.startActivity(Intent(Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    })
+                    if (onAppsClick != null) {
+                        onAppsClick()
+                    } else {
+                        context.startActivity(Intent(Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        })
+                    }
                 }
             )
 
