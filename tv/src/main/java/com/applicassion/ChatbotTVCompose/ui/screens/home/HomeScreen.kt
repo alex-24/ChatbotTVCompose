@@ -75,7 +75,7 @@ fun HomeScreen(
         if (!isLoadingApps && installedApps.isNotEmpty()) {
             AppsRow(
                 title = "Your Apps",
-                apps = installedApps,
+                apps = installedApps.take(8), // Show only first 8 on home
                 onAppClick = { app ->
                     appsViewModel.launchApp(app)
                 }
