@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -20,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.material3.Border
 import androidx.tv.material3.Card
 import androidx.tv.material3.CardDefaults
@@ -34,19 +36,26 @@ import com.applicassion.ChatbotTVCompose.ui.theme.ChatBotBubbleBorder
 import com.applicassion.ChatbotTVCompose.ui.theme.TextPrimary
 import com.applicassion.ChatbotTVCompose.ui.theme.UserBubble
 import com.applicassion.ChatbotTVCompose.ui.theme.UserBubbleBorder
+import com.applicassion.ChatbotTVCompose.ui.widgets.AppsRow
 import com.applicassion.ChatbotTVCompose.ui.widgets.HeaderWidget
 import com.applicassion.ChatbotTVCompose.ui.widgets.TvCircularProgressIndicator
 
 private val ChatBubbleShape = RoundedCornerShape(16.dp)
 
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
-
+fun HomeScreen(
+    modifier: Modifier = Modifier,
+    appsViewModel: AppsViewModel = hiltViewModel()
+) {
     val vocalAssistantViewModel = LocalVocalAssistantViewModel.current
     val uiState by vocalAssistantViewModel.vocalAssistantUIState.observeAsState(
         VocalAssistantUIState()
     )
     val conversation = vocalAssistantViewModel.conversation
+    
+    // Apps state
+    val installedApps by appsViewModel.appList.collectAsState()
+    val isLoadingApps by appsViewModel.isLoading.collectAsState()
 
     Column(
         modifier = modifier
@@ -57,14 +66,30 @@ fun HomeScreen(modifier: Modifier = Modifier) {
             )
             .fillMaxSize()
     ) {
+        // Header with mic button
         HeaderWidget()
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Apps Row
+        if (!isLoadingApps && installedApps.isNotEmpty()) {
+            AppsRow(
+                title = "Your Apps",
+                apps = installedApps,
+                onAppClick = { app ->
+                    appsViewModel.launchApp(app)
+                }
+            )
+            
+            Spacer(modifier = Modifier.height(24.dp))
+        }
 
         // Show error message if present
         uiState.error?.let { error ->
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp),
+                    .padding(vertical = 8.dp),
                 shape = RoundedCornerShape(8.dp),
                 colors = androidx.tv.material3.SurfaceDefaults.colors(
                     containerColor = MaterialTheme.colorScheme.errorContainer
@@ -78,12 +103,20 @@ fun HomeScreen(modifier: Modifier = Modifier) {
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        // Chat Section Title
+        Text(
+            text = "Assistant",
+            fontSize = 20.sp,
+            fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+            color = Color.White
+        )
+        
+        Spacer(modifier = Modifier.height(12.dp))
 
+        // Chat messages
         LazyColumn(
             modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 8.dp),
+                .weight(1f),
             contentPadding = PaddingValues(vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
