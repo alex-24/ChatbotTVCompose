@@ -78,7 +78,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.retrofit2.kotlinx.serialization.converter)
     implementation(libs.androidx.compose.material.icons.extended)
-    implementation(libs.coil.compose)
+    implementation(libs.coil.compose) // For network images (not used for app icons - those use pre-loaded Bitmaps)
 
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)

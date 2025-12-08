@@ -3,6 +3,10 @@ package com.applicassion.ChatbotTVCompose.data.repository_impl
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.util.Log
 import com.applicassion.ChatbotTVCompose.domain.model.AppModel
 import com.applicassion.ChatbotTVCompose.domain.repository.AppsRepository
@@ -24,6 +28,22 @@ class AppsRepositoryImpl @Inject constructor(
 
     companion object {
         private const val TAG = "AppsRepositoryImpl"
+        private const val ICON_SIZE = 96 // Fixed size for consistent caching
+    }
+
+    /**
+     * Convert Drawable to Bitmap efficiently
+     */
+    private fun Drawable.toBitmap(size: Int): Bitmap {
+        if (this is BitmapDrawable && bitmap != null) {
+            return Bitmap.createScaledBitmap(bitmap, size, size, true)
+        }
+        
+        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        setBounds(0, 0, size, size)
+        draw(canvas)
+        return bitmap
     }
 
     // Cache to avoid repeated expensive queries
@@ -43,7 +63,7 @@ class AppsRepositoryImpl @Inject constructor(
         val tvApps = getTvApps(packageManager)
 
         // If no TV apps found, fall back to regular launcher apps
-        val resolveInfos = tvApps.ifEmpty { getRegularApps(packageManager) }
+        val resolveInfos = if (tvApps.isNotEmpty()) tvApps else getRegularApps(packageManager)
 
         // Filter and get unique package names first (fast)
         val uniquePackages = resolveInfos
@@ -55,10 +75,11 @@ class AppsRepositoryImpl @Inject constructor(
             uniquePackages.map { resolveInfo ->
                 async(Dispatchers.IO) {
                     try {
+                        val drawable = resolveInfo.loadIcon(packageManager)
                         AppModel(
                             packageName = resolveInfo.activityInfo.packageName,
                             label = resolveInfo.loadLabel(packageManager).toString(),
-                            icon = resolveInfo.loadIcon(packageManager),
+                            icon = drawable.toBitmap(ICON_SIZE),
                             launchIntent = packageManager.getLaunchIntentForPackage(
                                 resolveInfo.activityInfo.packageName
                             )

@@ -1,7 +1,7 @@
 package com.applicassion.ChatbotTVCompose.domain.model
 
 import android.content.Intent
-import android.graphics.drawable.Drawable
+import android.graphics.Bitmap
 
 /**
  * Domain model representing an installed app on the device
@@ -9,7 +9,6 @@ import android.graphics.drawable.Drawable
 data class AppModel(
     val packageName: String,
     val label: String,
-    val icon: Drawable,
+    val icon: Bitmap?,
     val launchIntent: Intent?
 )
-

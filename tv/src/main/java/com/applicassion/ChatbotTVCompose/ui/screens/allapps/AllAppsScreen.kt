@@ -88,28 +88,29 @@ fun AllAppsScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Apps grid - show placeholders while loading
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 140.dp),
+            columns = GridCells.Fixed(6),
             contentPadding = PaddingValues(8.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp),
             modifier = Modifier.fillMaxSize()
         ) {
             if (isLoading) {
-                // Show placeholder grid
-                items(24) {
+                items(
+                    count = 24,
+                    contentType = { "placeholder" }
+                ) {
                     AppCardPlaceholder()
                 }
             } else {
                 items(
                     items = apps,
-                    key = { it.packageName }
+                    key = { it.packageName },
+                    contentType = { "app" }
                 ) { app ->
-                    val onClick = remember(app.packageName) { { appsViewModel.launchApp(app) } }
                     AppCard(
                         app = app,
-                        onClick = onClick
+                        onClick = { appsViewModel.launchApp(app) }
                     )
                 }
             }

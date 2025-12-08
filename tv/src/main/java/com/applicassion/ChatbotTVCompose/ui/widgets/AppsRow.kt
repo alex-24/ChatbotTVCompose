@@ -76,13 +76,12 @@ fun AppsRow(
         ) {
             items(
                 items = apps,
-                key = { it.packageName }
+                key = { it.packageName },
+                contentType = { "app" }
             ) { app ->
-                // Remember the click handler to avoid recomposition
-                val onClick = remember(app.packageName) { { onAppClick(app) } }
                 AppCard(
                     app = app,
-                    onClick = onClick
+                    onClick = { onAppClick(app) }
                 )
             }
         }
